@@ -53,6 +53,7 @@ typedef struct {
     int             is_partial;
     int             return_maps;
     int             return_trailer;
+    int             allow_trailing_commas;
     int             dedupe_keys;
     int             copy_strings;
     ERL_NIF_TERM    null_term;
@@ -83,6 +84,7 @@ dec_new(ErlNifEnv* env)
     d->is_partial = 0;
     d->return_maps = 0;
     d->return_trailer = 0;
+    d->allow_trailing_commas = 0;
     d->dedupe_keys = 0;
     d->copy_strings = 0;
     d->null_term = d->atoms->atom_null;
@@ -681,6 +683,8 @@ decode_init(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
             d->return_maps = 1;
         } else if(enif_is_identical(val, d->atoms->atom_return_trailer)) {
             d->return_trailer = 1;
+        } else if(enif_is_identical(val, d->atoms->atom_allow_trailing_commas)) {
+            d->allow_trailing_commas = 1;
         } else if(enif_is_identical(val, d->atoms->atom_dedupe_keys)) {
             d->dedupe_keys = 1;
         } else if(enif_is_identical(val, d->atoms->atom_copy_strings)) {
@@ -851,7 +855,7 @@ decode_iter(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
                         d->i++;
                         break;
                     case ']':
-                        if(!enif_is_empty_list(env, curr)) {
+                        if(!enif_is_empty_list(env, curr) && !d->allow_trailing_commas) {
                             ret = dec_error(d, "invalid_json");
                             goto done;
                         }
@@ -861,7 +865,7 @@ decode_iter(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
                             goto done;
                         }
                         dec_pop_assert(d, st_value);
-                        val = curr; // curr is []
+                        val = make_array(env, curr);
                         if(!enif_get_list_cell(env, objs, &curr, &objs)) {
                             ret = dec_error(d, "internal_error");
                             goto done;
@@ -898,14 +902,20 @@ decode_iter(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
                         curr = enif_make_list_cell(env, val, curr);
                         break;
                     case '}':
-                        if(!enif_is_empty_list(env, curr)) {
+                        if(!enif_is_empty_list(env, curr) && !d->allow_trailing_commas) {
                             ret = dec_error(d, "invalid_json");
                             goto done;
                         }
                         dec_pop_assert(d, st_key);
                         dec_pop_assert(d, st_object);
                         dec_pop_assert(d, st_value);
-                        val = make_empty_object(env, d->return_maps);
+                        if(enif_is_empty_list(env, curr)) {
+                            val = make_empty_object(env, d->return_maps);
+                        } else if(!make_object(env, curr, &val,
+                                d->return_maps, d->dedupe_keys)) {
+                            ret = dec_error(d, "internal_object_error");
+                            goto done;
+                        }
                         if(!enif_get_list_cell(env, objs, &curr, &objs)) {
                             ret = dec_error(d, "internal_error");
                             goto done;

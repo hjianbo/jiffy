@@ -31,6 +31,7 @@
 -type decode_option() :: return_maps
                         | use_nil
                         | return_trailer
+                        | allow_trailing_commas
                         | dedupe_keys
                         | copy_strings
                         | {null_term, any()}
