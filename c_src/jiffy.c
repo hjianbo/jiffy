@@ -28,6 +28,7 @@ load(ErlNifEnv* env, void** priv, ERL_NIF_TERM info)
     st->atom_bytes_per_red = make_atom(env, "bytes_per_red");
     st->atom_return_maps = make_atom(env, "return_maps");
     st->atom_return_trailer = make_atom(env, "return_trailer");
+    st->atom_allow_trailing_commas = make_atom(env, "allow_trailing_commas");
     st->atom_has_trailer = make_atom(env, "has_trailer");
     st->atom_nil = make_atom(env, "nil");
     st->atom_use_nil = make_atom(env, "use_nil");
