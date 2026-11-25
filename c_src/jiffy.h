@@ -33,6 +33,7 @@ typedef struct {
     ERL_NIF_TERM    atom_bytes_per_red;
     ERL_NIF_TERM    atom_return_maps;
     ERL_NIF_TERM    atom_return_trailer;
+    ERL_NIF_TERM    atom_allow_trailing_commas;
     ERL_NIF_TERM    atom_has_trailer;
     ERL_NIF_TERM    atom_nil;
     ERL_NIF_TERM    atom_use_nil;
