@@ -48,6 +48,8 @@ The options for decode are:
   JSON term is decoded the return value of decode/2 becomes
   `{has_trailer, FirstTerm, RestData::iodata()}`. This is useful to
   decode multiple terms in a single binary.
+* `allow_trailing_commas` - Allow trailing commas in arrays and
+  objects (for example `[1,2,]` and `{"a":1,}`).
 * `dedupe_keys` - If a key is repeated in a JSON object this flag
   will ensure that the parsed object only contains a single entry
   containing the last value seen. This mirrors the parsing beahvior
@@ -119,4 +121,3 @@ Improvements over EEP0018
 Jiffy should be in all ways an improvement over EEP0018. It no longer
 imposes limits on the nesting depth. It is capable of encoding and
 decoding large numbers and it does quite a bit more validation of UTF-8 in strings.
-
